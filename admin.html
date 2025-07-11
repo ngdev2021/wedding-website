@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wedding Admin Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'custom-red': '#DC2626',
+                        'custom-black': '#1F2937',
+                        'gold': '#D4AF37'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="container mx-auto px-6 py-8" x-data="adminData()">
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-serif text-custom-black mb-2">Wedding Admin Dashboard</h1>
+            <p class="text-gray-600">Manage RSVPs and Guest Book Messages</p>
+        </div>
+
+        <!-- Stats Overview -->
+        <div class="grid md:grid-cols-5 gap-6 mb-8">
+            <div class="bg-white rounded-lg p-6 shadow-md">
+                <h3 class="text-lg font-semibold text-gray-700 mb-2">Total RSVPs</h3>
+                <p class="text-3xl font-bold text-custom-black" x-text="stats.total || 0"></p>
+            </div>
+            <div class="bg-green-50 rounded-lg p-6 shadow-md border border-green-200">
+                <h3 class="text-lg font-semibold text-green-700 mb-2">Attending</h3>
+                <p class="text-3xl font-bold text-green-600" x-text="stats.attending || 0"></p>
+            </div>
+            <div class="bg-red-50 rounded-lg p-6 shadow-md border border-red-200">
+                <h3 class="text-lg font-semibold text-red-700 mb-2">Declining</h3>
+                <p class="text-3xl font-bold text-red-600" x-text="stats.declining || 0"></p>
+            </div>
+            <div class="bg-yellow-50 rounded-lg p-6 shadow-md border border-yellow-200">
+                <h3 class="text-lg font-semibold text-yellow-700 mb-2">Pending</h3>
+                <p class="text-3xl font-bold text-yellow-600" x-text="stats.pending || 0"></p>
+            </div>
+            <div class="bg-purple-50 rounded-lg p-6 shadow-md border border-purple-200">
+                <h3 class="text-lg font-semibold text-purple-700 mb-2">Waitlist</h3>
+                <p class="text-3xl font-bold text-purple-600" x-text="waitlistData.length || 0"></p>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="bg-white rounded-lg shadow-md mb-8">
+            <div class="border-b border-gray-200">
+                <nav class="flex space-x-8 px-6">
+                    <button @click="activeTab = 'rsvp'" 
+                            :class="activeTab === 'rsvp' ? 'border-custom-red text-custom-red' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                            class="py-4 px-1 border-b-2 font-medium text-sm">
+                        RSVP Responses
+                    </button>
+                    <button @click="activeTab = 'waitlist'" 
+                            :class="activeTab === 'waitlist' ? 'border-custom-red text-custom-red' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                            class="py-4 px-1 border-b-2 font-medium text-sm">
+                        Waitlist
+                    </button>
+                    <button @click="activeTab = 'guestbook'" 
+                            :class="activeTab === 'guestbook' ? 'border-custom-red text-custom-red' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                            class="py-4 px-1 border-b-2 font-medium text-sm">
+                        Guest Book Messages
+                    </button>
+                </nav>
+            </div>
+
+            <!-- RSVP Tab -->
+            <div x-show="activeTab === 'rsvp'" class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-serif text-custom-black">RSVP Responses</h2>
+                    <button @click="loadRsvpData()" class="bg-custom-red text-white px-4 py-2 rounded-lg hover:bg-opacity-90">
+                        Refresh
+                    </button>
+                </div>
+                
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Attendance</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Song Request</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Submitted</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <template x-for="rsvp in rsvpData" :key="rsvp.id">
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900" x-text="rsvp.name"></td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span x-show="rsvp.attendance === 'attending'" class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
+                                            Attending
+                                        </span>
+                                        <span x-show="rsvp.attendance === 'declining'" class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">
+                                            Declining
+                                        </span>
+                                        <span x-show="rsvp.attendance === 'not_specified'" class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                            Not Specified
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 text-sm text-gray-500" x-text="rsvp.song || '-'"></td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" x-text="formatDate(rsvp.timestamp)"></td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Waitlist Tab -->
+            <div x-show="activeTab === 'waitlist'" class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-serif text-custom-black">Waitlist Submissions</h2>
+                    <button @click="loadWaitlistData()" class="bg-custom-red text-white px-4 py-2 rounded-lg hover:bg-opacity-90">
+                        Refresh
+                    </button>
+                </div>
+                
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Song Request</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Submitted</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <template x-for="entry in waitlistData" :key="entry.id">
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900" x-text="entry.name"></td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-purple-100 text-purple-800">
+                                            Waitlist
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 text-sm text-gray-500" x-text="entry.song || '-'"></td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" x-text="formatDate(entry.timestamp)"></td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Guest Book Tab -->
+            <div x-show="activeTab === 'guestbook'" class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-serif text-custom-black">Guest Book Messages</h2>
+                    <button @click="loadGuestBookData()" class="bg-custom-red text-white px-4 py-2 rounded-lg hover:bg-opacity-90">
+                        Refresh
+                    </button>
+                </div>
+                
+                <div class="grid gap-6">
+                    <template x-for="message in guestBookData" :key="message.id">
+                        <div class="bg-gray-50 rounded-lg p-6 border border-gray-200">
+                            <div class="flex justify-between items-start mb-4">
+                                <div>
+                                    <h3 class="text-lg font-semibold text-custom-black" x-text="message.name"></h3>
+                                    <p class="text-sm text-gray-600" x-text="message.relationship"></p>
+                                </div>
+                                <span class="text-sm text-gray-500" x-text="formatDate(message.timestamp)"></span>
+                            </div>
+                            <p class="text-gray-700 italic" x-text="message.message"></p>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+
+        <!-- Export Section -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-2xl font-serif text-custom-black mb-4">Export Data</h2>
+            <div class="flex space-x-4">
+                <button @click="exportRsvpData()" class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-opacity-90">
+                    Export RSVP Data (CSV)
+                </button>
+                <button @click="exportWaitlistData()" class="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-opacity-90">
+                    Export Waitlist (CSV)
+                </button>
+                <button @click="exportGuestBookData()" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-opacity-90">
+                    Export Guest Book (CSV)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <script>
+        function adminData() {
+            return {
+                activeTab: 'rsvp',
+                rsvpData: [],
+                waitlistData: [],
+                guestBookData: [],
+                stats: {},
+
+                init() {
+                    this.loadStats();
+                    this.loadRsvpData();
+                    this.loadWaitlistData();
+                    this.loadGuestBookData();
+                },
+
+                async loadStats() {
+                    try {
+                        const response = await fetch('/api/rsvp/stats');
+                        const result = await response.json();
+                        if (result.success) {
+                            this.stats = result.stats;
+                        }
+                    } catch (error) {
+                        console.error('Error loading stats:', error);
+                    }
+                },
+
+                async loadRsvpData() {
+                    try {
+                        const response = await fetch('/api/rsvp');
+                        const result = await response.json();
+                        if (result.success) {
+                            this.rsvpData = result.rsvps || [];
+                        }
+                    } catch (error) {
+                        console.error('Error loading RSVP data:', error);
+                    }
+                },
+
+                async loadGuestBookData() {
+                    try {
+                        const response = await fetch('/api/guestbook');
+                        const result = await response.json();
+                        if (result.success) {
+                            this.guestBookData = result.messages || [];
+                        }
+                    } catch (error) {
+                        console.error('Error loading guest book data:', error);
+                    }
+                },
+
+                async loadWaitlistData() {
+                    try {
+                        const response = await fetch('/api/waitlist');
+                        const result = await response.json();
+                        if (result.success) {
+                            this.waitlistData = result.waitlist || [];
+                        }
+                    } catch (error) {
+                        console.error('Error loading waitlist data:', error);
+                    }
+                },
+
+                formatDate(timestamp) {
+                    return new Date(timestamp).toLocaleString('en-US', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                },
+
+                exportRsvpData() {
+                    const csvContent = this.convertToCSV(this.rsvpData, ['name', 'attendance', 'song', 'timestamp']);
+                    this.downloadCSV(csvContent, 'rsvp_data.csv');
+                },
+
+                exportGuestBookData() {
+                    const csvContent = this.convertToCSV(this.guestBookData, ['name', 'relationship', 'message', 'timestamp']);
+                    this.downloadCSV(csvContent, 'guestbook_data.csv');
+                },
+
+                exportWaitlistData() {
+                    const csvContent = this.convertToCSV(this.waitlistData, ['name', 'attendance', 'song', 'timestamp']);
+                    this.downloadCSV(csvContent, 'waitlist_data.csv');
+                },
+
+                convertToCSV(data, fields) {
+                    const headers = fields.join(',');
+                    const rows = data.map(item => 
+                        fields.map(field => {
+                            const value = item[field] || '';
+                            return `"${value.toString().replace(/"/g, '""')}"`;
+                        }).join(',')
+                    );
+                    return [headers, ...rows].join('\n');
+                },
+
+                downloadCSV(content, filename) {
+                    const blob = new Blob([content], { type: 'text/csv' });
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = filename;
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                }
+            }
+        }
+    </script>
+</body>
+</html> 

@@ -1,0 +1,67 @@
+// Image Configuration
+// Set to 'local' for development, 'production' for GCP bucket
+const IMAGE_ENV = 'local';
+
+// GCP Configuration
+const GCP_CONFIG = {
+    bucketName: 'your-wedding-website-bucket', // Replace with your actual bucket name
+    region: 'us-central1', // Replace with your preferred region
+    projectId: 'your-project-id' // Replace with your GCP project ID
+};
+
+// Image paths configuration
+const IMAGE_CONFIG = {
+    local: {
+        basePath: './images/',
+        images: {
+            proshot: 'proshot.jpg',
+            party_red_black: 'party_red_black.jpg',
+            champ_keke_red_black: 'champ-keke-red-black.jpg',
+            cowboy_beige_white: 'cowboy_beige_white.jpg',
+            jeep_life_red: 'jeep_life_red.jpg',
+            marriage_license: 'marriage-license.jpg',
+            vacation_swimsuit: 'vacation_swimsuit.jpg'
+        }
+    },
+    production: {
+        basePath: `https://storage.googleapis.com/${GCP_CONFIG.bucketName}/`,
+        images: {
+            proshot: 'proshot.jpg',
+            party_red_black: 'party_red_black.jpg',
+            champ_keke_red_black: 'champ-keke-red-black.jpg',
+            cowboy_beige_white: 'cowboy_beige_white.jpg',
+            jeep_life_red: 'jeep_life_red.jpg',
+            marriage_license: 'marriage-license.jpg',
+            vacation_swimsuit: 'vacation_swimsuit.jpg'
+        }
+    }
+};
+
+// Function to get image URL based on environment
+function getImageUrl(imageKey) {
+    const config = IMAGE_CONFIG[IMAGE_ENV];
+    return config.basePath + config.images[imageKey];
+}
+
+// Function to get all image URLs
+function getAllImageUrls() {
+    const config = IMAGE_CONFIG[IMAGE_ENV];
+    const urls = {};
+    
+    Object.keys(config.images).forEach(key => {
+        urls[key] = config.basePath + config.images[key];
+    });
+    
+    return urls;
+}
+
+// Export for use in other scripts
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = {
+        IMAGE_ENV,
+        GCP_CONFIG,
+        IMAGE_CONFIG,
+        getImageUrl,
+        getAllImageUrls
+    };
+} 

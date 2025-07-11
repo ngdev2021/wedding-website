@@ -1,0 +1,8 @@
+# Email Configuration (for notifications)
+# For Gmail, you'll need to use an App Password, not your regular password
+EMAIL_USER=your-email@gmail.com
+EMAIL_PASSWORD=your-app-password
+COUPLE_EMAIL=your-email@gmail.com
+
+# Optional: Database configuration (if you want to use a database instead of JSON files)
+# DATABASE_URL=sqlite:///wedding_data.db 
