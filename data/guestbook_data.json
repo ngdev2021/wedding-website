@@ -7,5 +7,27 @@
     "timestamp": "2025-07-12T13:09:44.911672",
     "date": "July 12, 2025",
     "ip_address": "127.0.0.1"
+  },
+  {
+    "id": "20250712_132605_413295",
+    "name": "Bob Johnson",
+    "relationship": "Family",
+    "message": "Imported guest: bob@example.com | 555-1234",
+    "timestamp": "2025-07-12T13:26:05.413322",
+    "ip_address": "imported",
+    "imported": true,
+    "email": "bob@example.com",
+    "phone": "555-1234"
+  },
+  {
+    "id": "20250712_132605_413329",
+    "name": "Alice Brown",
+    "relationship": "Friend",
+    "message": "Imported guest: alice@example.com | ",
+    "timestamp": "2025-07-12T13:26:05.413336",
+    "ip_address": "imported",
+    "imported": true,
+    "email": "alice@example.com",
+    "phone": ""
   }
 ]

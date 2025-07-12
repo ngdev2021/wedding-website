@@ -440,6 +440,104 @@ def update_site_config():
         print(f"Error updating site config: {e}")
         return jsonify({'error': 'Failed to update site configuration'}), 500
 
+@app.route('/api/import/rsvp', methods=['POST'])
+def import_rsvp_data():
+    """Import RSVP data from CSV"""
+    try:
+        data = request.get_json()
+        if not data or 'data' not in data:
+            return jsonify({'error': 'No data provided'}), 400
+        
+        imported_count = 0
+        existing_rsvps = load_data(RSVP_FILE)
+        existing_names = {rsvp['name'].lower() for rsvp in existing_rsvps}
+        
+        for row in data['data']:
+            # Validate required fields
+            if not row.get('name'):
+                continue
+                
+            # Skip if name already exists
+            if row['name'].lower() in existing_names:
+                continue
+            
+            # Create RSVP entry
+            rsvp_entry = {
+                'id': datetime.now().strftime('%Y%m%d_%H%M%S_%f'),
+                'name': row['name'],
+                'attendance': row.get('attendance', 'not_specified'),
+                'song': row.get('song', ''),
+                'timestamp': datetime.now().isoformat(),
+                'ip_address': 'imported',
+                'imported': True
+            }
+            
+            existing_rsvps.append(rsvp_entry)
+            existing_names.add(row['name'].lower())
+            imported_count += 1
+        
+        save_data(RSVP_FILE, existing_rsvps)
+        
+        return jsonify({
+            'success': True,
+            'imported': imported_count,
+            'message': f'Successfully imported {imported_count} RSVP records'
+        })
+        
+    except Exception as e:
+        print(f"Error importing RSVP data: {e}")
+        return jsonify({'error': 'Failed to import RSVP data'}), 500
+
+@app.route('/api/import/guests', methods=['POST'])
+def import_guest_data():
+    """Import guest list data from CSV"""
+    try:
+        data = request.get_json()
+        if not data or 'data' not in data:
+            return jsonify({'error': 'No data provided'}), 400
+        
+        imported_count = 0
+        existing_guests = load_data(GUESTBOOK_FILE)
+        existing_names = {guest['name'].lower() for guest in existing_guests}
+        
+        for row in data['data']:
+            # Validate required fields
+            if not row.get('name'):
+                continue
+                
+            # Skip if name already exists
+            if row['name'].lower() in existing_names:
+                continue
+            
+            # Create guest entry (as a guestbook message)
+            guest_entry = {
+                'id': datetime.now().strftime('%Y%m%d_%H%M%S_%f'),
+                'name': row['name'],
+                'relationship': row.get('category', 'Other'),
+                'message': f"Imported guest: {row.get('email', 'No email')} | {row.get('phone', 'No phone')}",
+                'timestamp': datetime.now().isoformat(),
+                'ip_address': 'imported',
+                'imported': True,
+                'email': row.get('email', ''),
+                'phone': row.get('phone', '')
+            }
+            
+            existing_guests.append(guest_entry)
+            existing_names.add(row['name'].lower())
+            imported_count += 1
+        
+        save_data(GUESTBOOK_FILE, existing_guests)
+        
+        return jsonify({
+            'success': True,
+            'imported': imported_count,
+            'message': f'Successfully imported {imported_count} guest records'
+        })
+        
+    except Exception as e:
+        print(f"Error importing guest data: {e}")
+        return jsonify({'error': 'Failed to import guest data'}), 500
+
 @app.route('/api/health', methods=['GET'])
 def health_check():
     """Health check endpoint"""

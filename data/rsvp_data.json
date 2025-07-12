@@ -1,1 +1,20 @@
-[]
+[
+  {
+    "id": "20250712_132601_078549",
+    "name": "John Doe",
+    "attendance": "attending",
+    "song": "Happy",
+    "timestamp": "2025-07-12T13:26:01.078579",
+    "ip_address": "imported",
+    "imported": true
+  },
+  {
+    "id": "20250712_132601_078601",
+    "name": "Jane Smith",
+    "attendance": "declining",
+    "song": "",
+    "timestamp": "2025-07-12T13:26:01.078611",
+    "ip_address": "imported",
+    "imported": true
+  }
+]
