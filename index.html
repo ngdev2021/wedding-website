@@ -1513,12 +1513,34 @@
                     <div>
                         <h3 class="text-2xl font-serif text-custom-black">Getting Here & Staying Over</h3>
                         <p class="mt-4 text-lg">For our out-of-town guests, we encourage you to book your accommodations early to ensure availability.</p>
-                        <div x-show="siteConfig.showHotelInfo" class="mt-6 p-6 border border-gray-200 rounded-lg shadow-sm bg-white">
+                                                <div x-show="siteConfig.showHotelInfo" class="mt-6 p-6 border border-gray-200 rounded-lg shadow-sm bg-white">
                             <p class="font-bold text-xl" x-text="siteConfig.hotelName">Hampton Inn & Suites Ft. Worth-Burleson</p>
                             <p class="mt-2" x-text="siteConfig.hotelAddress">13251 Jake Ct, Burleson, TX 76028</p>
                             <a :href="siteConfig.bookingLink" target="_blank" class="inline-block mt-4 bg-custom-red text-white font-bold py-3 px-8 rounded-full hover:bg-opacity-90 hover:scale-105 transform transition-all shadow-lg drop-shadow-lg">Book Your Room</a>
                         </div>
-                         <p class="mt-6 text-sm"><strong>For Our Families:</strong> For close family members interested in alternative arrangements, please reach out to Judy, Frankie, or Shawnta directly regarding available space at their homes.</p>
+                        
+                        <!-- Family Contact Information - More prominent when hotel is hidden -->
+                        <div x-show="!siteConfig.showHotelInfo" class="mt-6 p-6 border-2 border-custom-red rounded-lg shadow-lg bg-gradient-to-r from-red-50 to-white">
+                            <h4 class="text-xl font-serif text-custom-black mb-3">Family Accommodations</h4>
+                            <p class="text-lg text-gray-700 mb-4">For close family members interested in alternative arrangements, please reach out to our family members directly regarding available space at their homes.</p>
+                            <div class="grid md:grid-cols-3 gap-4 text-center">
+                                <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+                                    <p class="font-bold text-custom-red text-lg">Judy</p>
+                                    <p class="text-sm text-gray-600">Contact for accommodation details</p>
+                                </div>
+                                <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+                                    <p class="font-bold text-custom-red text-lg">Frankie</p>
+                                    <p class="text-sm text-gray-600">Contact for accommodation details</p>
+                                </div>
+                                <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+                                    <p class="font-bold text-custom-red text-lg">Shawnta</p>
+                                    <p class="text-sm text-gray-600">Contact for accommodation details</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Family Contact Information - Standard when hotel is shown -->
+                        <p x-show="siteConfig.showHotelInfo" class="mt-6 text-sm"><strong>For Our Families:</strong> For close family members interested in alternative arrangements, please reach out to Judy, Frankie, or Shawnta directly regarding available space at their homes.</p>
                     </div>
                     <!-- Map removed for privacy -->
                 </div>
