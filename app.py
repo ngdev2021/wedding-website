@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify, render_template_string, send_from_dir
 from flask_cors import CORS
 import json
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
@@ -243,13 +243,65 @@ def get_guestbook():
 
 @app.route('/api/rsvp/stats', methods=['GET'])
 def get_rsvp_stats():
-    """Get RSVP statistics"""
+    """Get RSVP statistics with enhanced metrics"""
     try:
         rsvp_data = load_data(RSVP_FILE)
+        waitlist_data = load_data(WAITLIST_FILE)
+        guestbook_data = load_data(GUESTBOOK_FILE)
         
+        # Basic RSVP stats
         attending = len([r for r in rsvp_data if r.get('attendance') == 'attending'])
         declining = len([r for r in rsvp_data if r.get('attendance') == 'declining'])
         total = len(rsvp_data)
+        
+        # Calculate rates
+        attending_rate = f"{(attending / total * 100):.1f}%" if total > 0 else "0%"
+        declining_rate = f"{(declining / total * 100):.1f}%" if total > 0 else "0%"
+        
+        # Recent activity (last 24 hours)
+        now = datetime.now()
+        yesterday = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        
+        last_24h_rsvps = len([r for r in rsvp_data 
+                             if datetime.fromisoformat(r['timestamp'].replace('Z', '+00:00')).replace(tzinfo=None) > yesterday])
+        
+        # Waitlist stats
+        waitlist_today = len([w for w in waitlist_data 
+                             if datetime.fromisoformat(w['timestamp'].replace('Z', '+00:00')).replace(tzinfo=None) > yesterday])
+        
+        # Guestbook stats
+        guestbook_today = len([g for g in guestbook_data 
+                              if datetime.fromisoformat(g['timestamp'].replace('Z', '+00:00')).replace(tzinfo=None) > yesterday])
+        
+        # This week stats
+        week_ago = now.replace(hour=0, minute=0, second=0, microsecond=0) - timedelta(days=7)
+        guestbook_week = len([g for g in guestbook_data 
+                             if datetime.fromisoformat(g['timestamp'].replace('Z', '+00:00')).replace(tzinfo=None) > week_ago])
+        
+        # Song requests
+        song_requests = len([r for r in rsvp_data if r.get('song', '').strip()])
+        
+        # Most active day
+        day_counts = {}
+        for r in rsvp_data:
+            date = datetime.fromisoformat(r['timestamp'].replace('Z', '+00:00')).strftime('%A')
+            day_counts[date] = day_counts.get(date, 0) + 1
+        
+        most_active_day = max(day_counts.items(), key=lambda x: x[1])[0] if day_counts else 'N/A'
+        
+        # Average response time (simplified - using submission time as proxy)
+        if rsvp_data:
+            # Calculate average time between submissions (as a proxy for response time)
+            timestamps = [datetime.fromisoformat(r['timestamp'].replace('Z', '+00:00')) for r in rsvp_data]
+            timestamps.sort()
+            if len(timestamps) > 1:
+                intervals = [(timestamps[i+1] - timestamps[i]).total_seconds() / 3600 for i in range(len(timestamps)-1)]
+                avg_interval = sum(intervals) / len(intervals)
+                avg_response_time = f"{avg_interval:.1f} hours"
+            else:
+                avg_response_time = "N/A"
+        else:
+            avg_response_time = "N/A"
         
         return jsonify({
             'success': True,
@@ -257,7 +309,16 @@ def get_rsvp_stats():
                 'total': total,
                 'attending': attending,
                 'declining': declining,
-                'pending': total - attending - declining
+                'pending': total - attending - declining,
+                'attendingRate': attending_rate,
+                'decliningRate': declining_rate,
+                'last24h': last_24h_rsvps,
+                'waitlistToday': waitlist_today,
+                'guestbookToday': guestbook_today,
+                'guestbookWeek': guestbook_week,
+                'songRequests': song_requests,
+                'mostActiveDay': most_active_day,
+                'avgResponseTime': avg_response_time
             }
         })
     except Exception as e:
