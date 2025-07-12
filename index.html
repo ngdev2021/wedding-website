@@ -147,6 +147,7 @@
                 isEnhancedModalOpen: false,
                 videoModalData: { src: '', title: '', description: '' },
                 isVideoModalOpen: false,
+                showRegistryModal: false,
                 youtubePlayer: null,
                 playerReady: false,
                 guestBook: { name: '', relationship: '', message: '' },
@@ -1738,12 +1739,10 @@
                         <p class="text-gray-600 mb-6">
                             We've curated a collection of items that will help us build our home together. From kitchen essentials to home decor, every gift is thoughtfully chosen.
                         </p>
-                        <a href="https://blissandbone.sendbirdie.com/r/AlwaysAnd4EverElder?cko=0" 
-                           target="_blank" 
-                           rel="noopener noreferrer"
-                           class="inline-block bg-custom-red text-white font-bold py-3 px-8 rounded-full hover:bg-opacity-90 hover:scale-105 transform transition-all shadow-lg drop-shadow-lg">
-                            View Our Registry
-                        </a>
+                        <button @click="showRegistryModal = true" 
+                                class="inline-block bg-custom-red text-white font-bold py-3 px-8 rounded-full hover:bg-opacity-90 hover:scale-105 transform transition-all shadow-lg drop-shadow-lg">
+                            Browse Our Registry
+                        </button>
                     </div>
                     
                     <!-- Honeymoon Fund -->
@@ -1925,6 +1924,48 @@
         <div @click.away="closeModal()" class="relative">
             <img :src="modalImageUrl" alt="Enlarged memory" class="max-w-full max-h-[90vh] rounded-lg">
             <button @click="closeModal()" class="absolute -top-4 -right-4 bg-white text-black rounded-full h-10 w-10 flex items-center justify-center text-2xl">&times;</button>
+        </div>
+    </div>
+
+    <!-- Registry Modal -->
+    <div x-show="showRegistryModal" x-cloak @keydown.escape.window="showRegistryModal = false" class="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
+        <div @click.away="showRegistryModal = false" class="relative w-full max-w-6xl h-[90vh] bg-white rounded-2xl overflow-hidden shadow-2xl">
+            <!-- Registry Header -->
+            <div class="bg-gradient-to-r from-custom-red to-custom-black text-white p-6">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <span class="text-3xl mr-4">🎁</span>
+                        <div>
+                            <h3 class="text-2xl font-bold">Our Wedding Registry</h3>
+                            <p class="text-red-100 text-sm">Browse and shop our carefully curated collection</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <a href="https://blissandbone.sendbirdie.com/r/AlwaysAnd4EverElder?cko=0" 
+                           target="_blank" 
+                           rel="noopener noreferrer"
+                           class="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-full transition-colors text-sm font-medium">
+                            Open in New Tab
+                        </a>
+                        <button @click="showRegistryModal = false" class="bg-white/20 hover:bg-white/30 rounded-full p-2 transition-colors">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Registry iframe -->
+            <div class="h-full">
+                <iframe src="https://blissandbone.sendbirdie.com/r/AlwaysAnd4EverElder?cko=0" 
+                        class="w-full h-full border-0"
+                        title="Wedding Registry"
+                        loading="lazy"
+                        sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox">
+                    <p>Your browser doesn't support iframes. <a href="https://blissandbone.sendbirdie.com/r/AlwaysAnd4EverElder?cko=0" target="_blank" rel="noopener noreferrer">Click here to view our registry</a></p>
+                </iframe>
+            </div>
         </div>
     </div>
 
