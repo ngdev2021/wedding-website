@@ -217,11 +217,23 @@
 
     <!-- Main Application Logic -->
     <script>
-        // Set dynamic Open Graph URL
-        document.addEventListener('DOMContentLoaded', function() {
+        // Set dynamic Open Graph URL with shortening
+        document.addEventListener('DOMContentLoaded', async function() {
             const ogUrlMeta = document.getElementById('og-url');
             if (ogUrlMeta) {
-                ogUrlMeta.setAttribute('content', window.location.href);
+                try {
+                    // Try to shorten the URL using TinyURL API
+                    const response = await fetch('https://tinyurl.com/api-create.php?url=' + encodeURIComponent(window.location.href));
+                    if (response.ok) {
+                        const shortenedUrl = await response.text();
+                        ogUrlMeta.setAttribute('content', shortenedUrl);
+                    } else {
+                        ogUrlMeta.setAttribute('content', window.location.href);
+                    }
+                } catch (error) {
+                    // Fallback to original URL if shortening fails
+                    ogUrlMeta.setAttribute('content', window.location.href);
+                }
             }
         });
         
