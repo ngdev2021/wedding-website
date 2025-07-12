@@ -108,6 +108,7 @@ def index():
     """Serve the main wedding website"""
     return send_from_directory('.', 'index.html')
 
+@app.route('/admin')
 @app.route('/admin.html')
 def admin():
     """Serve the admin dashboard"""
