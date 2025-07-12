@@ -67,7 +67,7 @@ const timelineData = [
             }
         ],
         video: {
-            src: "./videos/proposal.mp4",
+            src: "https://storage.googleapis.com/wedding-website-2025-regdev-1752188684/videos/proposal.mp4",
             title: "The Proposal Video",
             description: "Watch the magical moment when Marcus asked Lakeigha to spend forever together",
             duration: "2:34",
