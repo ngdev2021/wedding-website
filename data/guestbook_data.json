@@ -1,1 +1,11 @@
-[]
+[
+  {
+    "id": "20250712_130944",
+    "name": "Test User",
+    "relationship": "Friend",
+    "message": "This is a test message",
+    "timestamp": "2025-07-12T13:09:44.911672",
+    "date": "July 12, 2025",
+    "ip_address": "127.0.0.1"
+  }
+]

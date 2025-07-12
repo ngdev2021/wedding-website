@@ -125,6 +125,70 @@
             opacity: 1 !important;
             transform: none !important;
         }
+        
+        /* Registry iframe optimizations for better layout */
+        .registry-iframe-container {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .registry-iframe-container iframe {
+            transform: scale(1);
+            transform-origin: 0 0;
+        }
+        
+        /* Force 2-column layout on smaller screens */
+        @media (min-width: 390px) and (max-width: 767px) {
+            .registry-iframe-container iframe {
+                transform: scale(0.85);
+                transform-origin: 0 0;
+            }
+        }
+        
+        /* Optimize for 2x2 card layout on medium screens */
+        @media (min-width: 768px) and (max-width: 1023px) {
+            .registry-iframe-container iframe {
+                transform: scale(1.05);
+                transform-origin: 0 0;
+            }
+        }
+        
+        /* Optimize for 2x2 card layout on large screens */
+        @media (min-width: 1024px) {
+            .registry-iframe-container iframe {
+                transform: scale(1.1);
+                transform-origin: 0 0;
+            }
+        }
+        
+        /* Device-specific optimizations */
+        @media (max-width: 480px) and (orientation: landscape) {
+            .registry-iframe-container iframe {
+                transform: scale(0.8);
+                transform-origin: 0 0;
+            }
+        }
+        
+        /* iPhone SE and similar small devices */
+        @media (max-width: 375px) {
+            .registry-iframe-container iframe {
+                transform: scale(0.75);
+                transform-origin: 0 0;
+            }
+        }
+        
+        /* Additional iframe optimizations for 2-column layout */
+        .registry-iframe-container {
+            min-width: 390px;
+        }
+        
+        /* Force minimum width to maintain 2 columns */
+        @media (max-width: 389px) {
+            .registry-iframe-container {
+                min-width: 390px;
+                overflow-x: auto;
+            }
+        }
     </style>
 
     <!-- Main Application Logic -->
@@ -1721,55 +1785,47 @@
         </section>
         
         <!-- Section: Registry -->
-        <section id="registry" class="py-20 md:py-32 bg-gray-50 fade-in-section">
-            <div class="container mx-auto px-6">
-                <div class="text-center mb-12">
-                    <h2 class="text-4xl md:text-5xl font-serif text-custom-black">Wedding Registry</h2>
+        <section id="registry" class="py-12 md:py-20 bg-gray-50 fade-in-section">
+            <div class="container mx-auto px-4 md:px-6">
+                <div class="text-center mb-8 md:mb-12">
+                    <h2 class="text-3xl md:text-4xl lg:text-5xl font-serif text-custom-black">Wedding Registry</h2>
                     <div class="section-divider"></div>
-                    <p class="text-lg leading-relaxed max-w-3xl mx-auto">
+                    <p class="text-base md:text-lg leading-relaxed max-w-2xl mx-auto">
                         Your presence at our wedding is the only gift we need. Seriously! However, for friends and family who have expressed an interest in giving, we've created a registry with items that would help us start our new life together.
                     </p>
                 </div>
                 
                 <!-- Embedded Registry -->
-                <div class="bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
+                <div class="bg-white rounded-xl shadow-xl border border-gray-200 overflow-hidden">
                     <!-- Registry Header -->
-                    <div class="bg-gradient-to-r from-custom-red to-custom-black text-white p-4 md:p-6">
-                        <div class="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
-                            <div class="flex items-center">
-                                <span class="text-2xl md:text-3xl mr-3 md:mr-4">🎁</span>
-                                <div>
-                                    <h3 class="text-xl md:text-2xl font-bold">Our Wedding Registry</h3>
-                                    <p class="text-red-100 text-xs md:text-sm">Browse and shop our carefully curated collection</p>
-                                </div>
-                            </div>
-                            <div class="flex items-center space-x-4">
-                                <a href="https://blissandbone.sendbirdie.com/r/AlwaysAnd4EverElder?cko=0" 
-                                   target="_blank" 
-                                   rel="noopener noreferrer"
-                                   class="bg-white/20 hover:bg-white/30 text-white px-3 md:px-4 py-2 rounded-full transition-colors text-xs md:text-sm font-medium">
-                                    Open in New Tab
-                                </a>
-                            </div>
+                    <div class="bg-gradient-to-r from-custom-red to-custom-black text-white p-3 md:p-4">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-lg md:text-xl font-bold">Our Wedding Registry</h3>
+                            <a href="https://blissandbone.sendbirdie.com/r/AlwaysAnd4EverElder?cko=0&layout=grid&view=2x2&min_width=390" 
+                               target="_blank" 
+                               rel="noopener noreferrer"
+                               class="bg-white/20 hover:bg-white/30 text-white px-3 py-1.5 rounded-full transition-colors text-xs md:text-sm font-medium">
+                                Open in New Tab
+                            </a>
                         </div>
                     </div>
                     
                     <!-- Registry iframe -->
-                    <div class="w-full h-[500px] sm:h-[600px] md:h-[700px] lg:h-[900px]">
-                        <iframe src="https://blissandbone.sendbirdie.com/r/AlwaysAnd4EverElder?cko=0" 
+                    <div class="registry-iframe-container w-full h-[700px] sm:h-[800px] md:h-[900px] lg:h-[1000px] xl:h-[1100px]">
+                        <iframe src="https://blissandbone.sendbirdie.com/r/AlwaysAnd4EverElder?cko=0&layout=grid&view=2x2&min_width=390" 
                                 class="w-full h-full border-0"
                                 title="Wedding Registry"
                                 loading="lazy"
                                 sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox"
-                                style="min-height: 500px;">
-                            <p>Your browser doesn't support iframes. <a href="https://blissandbone.sendbirdie.com/r/AlwaysAnd4EverElder?cko=0" target="_blank" rel="noopener noreferrer">Click here to view our registry</a></p>
+                                style="min-height: 700px; min-width: 390px; aspect-ratio: 16/10;">
+                            <p>Your browser doesn't support iframes. <a href="https://blissandbone.sendbirdie.com/r/AlwaysAnd4EverElder?cko=0&layout=grid&view=2x2&min_width=390" target="_blank" rel="noopener noreferrer">Click here to view our registry</a></p>
                         </iframe>
                     </div>
                 </div>
                 
                 <!-- Additional Note -->
-                <div class="mt-8 p-6 bg-custom-red/10 rounded-lg border border-custom-red/20 text-center">
-                    <p class="text-custom-black font-medium">
+                <div class="mt-6 md:mt-8 p-4 md:p-6 bg-custom-red/10 rounded-lg border border-custom-red/20 text-center">
+                    <p class="text-custom-black font-medium text-sm md:text-base">
                         💝 Remember: Your presence and love are the greatest gifts of all. We're so excited to celebrate with you!
                     </p>
                 </div>
