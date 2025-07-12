@@ -22,6 +22,9 @@
     <!-- Image Configuration -->
     <script src="config.js"></script>
     
+    <!-- Timeline Data -->
+    <script src="timeline.js"></script>
+    
     <!-- Alpine.js for interactivity -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
@@ -142,10 +145,13 @@
                 currentGallery: 'all',
                 enhancedModalData: { imageUrl: '', title: '', description: '' },
                 isEnhancedModalOpen: false,
+                videoModalData: { src: '', title: '', description: '' },
+                isVideoModalOpen: false,
                 youtubePlayer: null,
                 playerReady: false,
                 guestBook: { name: '', relationship: '', message: '' },
                 guestBookMessages: [],
+                timelineData: window.timelineData || [],
 
                 init() {
                     // Ensure DOM is ready
@@ -344,6 +350,81 @@
                     this.isEnhancedModalOpen = false;
                 },
 
+                openVideoModal(videoData) {
+                    this.videoModalData = videoData;
+                    this.isVideoModalOpen = true;
+                },
+                
+                closeVideoModal() {
+                    this.isVideoModalOpen = false;
+                    // Pause any playing video when closing modal
+                    const video = document.getElementById('modalVideo');
+                    if (video) {
+                        video.pause();
+                    }
+                },
+
+                shareVideo() {
+                    if (navigator.share) {
+                        navigator.share({
+                            title: 'The Proposal Video - Marcus & Lakeigha',
+                            text: 'Watch the magical moment when Marcus asked Lakeigha to spend forever together! 💍',
+                            url: window.location.href + '#timeline'
+                        });
+                    } else {
+                        // Fallback: copy to clipboard
+                        navigator.clipboard.writeText(window.location.href + '#timeline').then(() => {
+                            alert('Link copied to clipboard! Share this with your friends and family.');
+                        });
+                    }
+                },
+
+                downloadVideo() {
+                    const video = document.getElementById('modalVideo');
+                    if (video && video.src) {
+                        const link = document.createElement('a');
+                        link.href = video.src;
+                        link.download = 'proposal-video-marcus-lakeigha.mp4';
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                    } else {
+                        alert('Video download is not available at this time.');
+                    }
+                },
+
+                // Timeline functions
+                viewTimelineImages(timelineItem) {
+                    // Create a gallery view for all images in this timeline item
+                    if (timelineItem.images && timelineItem.images.length > 0) {
+                        // Show the first image in the enhanced modal
+                        const firstImage = timelineItem.images[0];
+                        this.openEnhancedModal(firstImage.src, firstImage.title, firstImage.description);
+                        
+                        // Store the timeline item for navigation
+                        this.currentTimelineItem = timelineItem;
+                        this.currentTimelineImageIndex = 0;
+                    }
+                },
+
+                nextTimelineImage() {
+                    if (this.currentTimelineItem && this.currentTimelineItem.images) {
+                        this.currentTimelineImageIndex = (this.currentTimelineImageIndex + 1) % this.currentTimelineItem.images.length;
+                        const image = this.currentTimelineItem.images[this.currentTimelineImageIndex];
+                        this.openEnhancedModal(image.src, image.title, image.description);
+                    }
+                },
+
+                previousTimelineImage() {
+                    if (this.currentTimelineItem && this.currentTimelineItem.images) {
+                        this.currentTimelineImageIndex = this.currentTimelineImageIndex === 0 
+                            ? this.currentTimelineItem.images.length - 1 
+                            : this.currentTimelineImageIndex - 1;
+                        const image = this.currentTimelineItem.images[this.currentTimelineImageIndex];
+                        this.openEnhancedModal(image.src, image.title, image.description);
+                    }
+                },
+
                 async loadGuestBookMessages() {
                     try {
                         const response = await fetch('/api/guestbook');
@@ -499,6 +580,7 @@
             <div class="hidden md:flex space-x-8">
                 <a href="#story" class="hover:text-gold transition-colors">Our Story</a>
                 <a href="#gallery" class="hover:text-gold transition-colors">Moments</a>
+                <a href="#timeline" class="hover:text-gold transition-colors">Timeline</a>
                 <a href="#celebration" class="hover:text-gold transition-colors">Celebration</a>
                 <a href="#travel" class="hover:text-gold transition-colors">Travel</a>
                 <a href="#guestbook" class="hover:text-gold transition-colors">Guest Book</a>
@@ -532,6 +614,7 @@
             <div class="container mx-auto px-6 py-4 space-y-4">
                 <a href="#story" @click="mobileMenuOpen = false" class="block py-3 text-custom-black hover:text-gold transition-colors border-b border-gray-100">Our Story</a>
                 <a href="#gallery" @click="mobileMenuOpen = false" class="block py-3 text-custom-black hover:text-gold transition-colors border-b border-gray-100">Moments</a>
+                <a href="#timeline" @click="mobileMenuOpen = false" class="block py-3 text-custom-black hover:text-gold transition-colors border-b border-gray-100">Timeline</a>
                 <a href="#celebration" @click="mobileMenuOpen = false" class="block py-3 text-custom-black hover:text-gold transition-colors border-b border-gray-100">Celebration</a>
                 <a href="#travel" @click="mobileMenuOpen = false" class="block py-3 text-custom-black hover:text-gold transition-colors border-b border-gray-100">Travel</a>
                 <a href="#guestbook" @click="mobileMenuOpen = false" class="block py-3 text-custom-black hover:text-gold transition-colors border-b border-gray-100">Guest Book</a>
@@ -730,7 +813,7 @@
                          x-show="currentGallery === 'all' || currentGallery === 'early'"
                          @click="openEnhancedModal('https://storage.googleapis.com/wedding-website-2025-regdev-1752188684/earlydays_lakeigha_pose.jpg', 'Lakeigha in the City', 'Lakeigha striking a pose in the city during our early adventures.')">
                         <div class="relative group">
-                            <img src="https://storage.googleapis.com/wedding-website-2025-regdev-1752188684/earlydays_lakeigha_pose.jpg" alt="Lakeigha in the City" class="w-full h-64 object-cover">
+                            <img src="https://storage.googleapis.com/wedding-website-2025-regdev-1752188684/earlydays_lakeigha_pose.jpg" alt="Lakeigha in the City" class="w-full h-64 object-contain bg-gray-100">
                             <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                                 <div class="text-white text-center">
                                     <h3 class="font-bold text-lg">Lakeigha in the City</h3>
@@ -744,7 +827,7 @@
                     <div class="gallery-item overflow-hidden rounded-lg shadow-lg cursor-pointer transform hover:scale-105 transition-all duration-300" 
                          data-category="recent"
                          x-show="currentGallery === 'all' || currentGallery === 'recent'"
-                         @click="openEnhancedModal('./images/champ-keke-red-black.jpg', 'Champagne Celebration', 'Our first big celebration together')">
+                         @click="openEnhancedModal('./images/champ-keke-red-black.jpg', 'Champagne Celebration', 'Celebrating our love with style and elegance')">
                         <div class="relative group">
                             <img src="./images/champ-keke-red-black.jpg" alt="Champagne Celebration" class="w-full h-64 object-cover">
                             <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
@@ -823,6 +906,262 @@
                                     <p class="text-sm">Click to view</p>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section: Our Love Story Timeline -->
+        <section id="timeline" class="py-20 md:py-32 bg-gradient-to-br from-gray-50 to-white fade-in-section">
+            <div class="container mx-auto px-6 text-center">
+                <h2 class="text-4xl md:text-5xl font-serif text-custom-black mb-2">Our Love Story</h2>
+                <div class="section-divider"></div>
+                <p class="max-w-2xl mx-auto text-lg mb-16">A beautiful journey from our first adventures to the present day.</p>
+                <!-- Story Journey Container -->
+                <div class="max-w-6xl mx-auto">
+                    <!-- Story Items -->
+                    <div class="space-y-24">
+                        <!-- Early Days Header -->
+                        <div class="mb-10">
+                            <h3 class="text-xl md:text-2xl font-serif text-blue-700 font-bold tracking-wide uppercase">Early Days</h3>
+                        </div>
+                        <template x-for="(item, index) in timelineData" :key="item.id">
+                            <div>
+                                <!-- Section headers for each era -->
+                                <template x-if="item.id === 2">
+                                    <div class="mb-10">
+                                        <h3 class="text-xl md:text-2xl font-serif text-green-700 font-bold tracking-wide uppercase">Adventures & Growth</h3>
+                                    </div>
+                                </template>
+                                <template x-if="item.id === 3">
+                                    <div class="mb-10">
+                                        <h3 class="text-xl md:text-2xl font-serif text-pink-700 font-bold tracking-wide uppercase">The Proposal</h3>
+                                    </div>
+                                </template>
+                                <template x-if="item.id === 4">
+                                    <div class="mb-10">
+                                        <h3 class="text-xl md:text-2xl font-serif text-purple-700 font-bold tracking-wide uppercase">Professional Memories</h3>
+                                    </div>
+                                </template>
+                                <template x-if="item.id === 5">
+                                    <div class="mb-10">
+                                        <h3 class="text-xl md:text-2xl font-serif text-yellow-700 font-bold tracking-wide uppercase">Making It Official</h3>
+                                    </div>
+                                </template>
+                                <template x-if="item.id === 6">
+                                    <div class="mb-10">
+                                        <h3 class="text-xl md:text-2xl font-serif text-red-700 font-bold tracking-wide uppercase">Celebrating Love</h3>
+                                    </div>
+                                </template>
+                                <!-- Timeline Card -->
+                                <div class="relative" :class="item.video && item.video.featured ? 'ring-4 ring-pink-300 rounded-3xl p-8 bg-gradient-to-br from-pink-50 via-red-50 to-pink-100 shadow-2xl' : 'bg-white/90 rounded-2xl p-8 shadow-xl'">
+                                    <!-- Premium Badge for Featured Video -->
+                                    <div x-show="item.video && item.video.featured" class="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-pink-500 to-red-500 text-white px-6 py-2 rounded-full text-sm font-bold shadow-lg z-10">
+                                        ✨ PREMIUM MOMENT ✨
+                                    </div>
+                                    <div class="flex flex-col md:flex-row items-center md:items-start gap-8 md:gap-12"
+                                         :class="index % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'">
+                                        <!-- Story Icon -->
+                                        <div class="order-1 md:order-none">
+                                            <div class="bg-gradient-to-r" :class="item.color" 
+                                                 class="w-20 h-20 md:w-24 md:h-24 rounded-full flex items-center justify-center shadow-xl transform hover:scale-110 transition-transform duration-300">
+                                                <span class="text-2xl md:text-3xl" x-text="item.icon"></span>
+                                            </div>
+                                        </div>
+                                        <!-- Timeline Content and Media -->
+                                        <template x-if="index % 2 === 0">
+                                            <div class="flex-1 max-w-md md:max-w-lg order-2 md:order-1 md:text-left">
+                                                <!-- Date and Title -->
+                                                <div class="mb-4">
+                                                    <div class="text-sm font-semibold text-gold uppercase tracking-wide" x-show="false"></div>
+                                                    <h3 class="text-2xl md:text-3xl font-serif text-custom-black mb-2" x-text="item.title"></h3>
+                                                </div>
+                                                <!-- Description -->
+                                                <p class="text-lg leading-relaxed mb-6 text-gray-700" x-text="item.description"></p>
+                                            </div>
+                                        </template>
+                                        <template x-if="index % 2 !== 0">
+                                            <div class="flex-1 max-w-md md:max-w-lg order-2 md:order-2 md:text-right">
+                                                <!-- Date and Title -->
+                                                <div class="mb-4">
+                                                    <div class="text-sm font-semibold text-gold uppercase tracking-wide" x-show="false"></div>
+                                                    <h3 class="text-2xl md:text-3xl font-serif text-custom-black mb-2" x-text="item.title"></h3>
+                                                </div>
+                                                <!-- Description -->
+                                                <p class="text-lg leading-relaxed mb-6 text-gray-700" x-text="item.description"></p>
+                                            </div>
+                                        </template>
+                                        <template x-if="index % 2 === 0">
+                                            <div class="flex-1 order-3 md:order-2">
+                                                <!-- Enhanced Video Player (if available) -->
+                                                <div x-show="item.video" class="mb-8">
+                                                    <div class="relative group cursor-pointer overflow-hidden rounded-2xl shadow-2xl transform hover:scale-105 transition-all duration-500"
+                                                         :class="item.video.featured ? 'ring-4 ring-pink-300 ring-opacity-50' : ''"
+                                                         @click="openVideoModal(item.video)">
+                                                        <video :src="item.video.src" 
+                                                               class="w-full h-64 md:h-80 object-contain bg-black"
+                                                               preload="metadata">
+                                                        </video>
+                                                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent">
+                                                            <div class="absolute inset-0 flex items-center justify-center">
+                                                                <div class="bg-white/20 backdrop-blur-md rounded-full p-6 transform hover:scale-110 transition-all duration-300 border border-white/30">
+                                                                    <svg class="w-16 h-16 text-white drop-shadow-lg" fill="currentColor" viewBox="0 0 24 24">
+                                                                        <path d="M8 5v14l11-7z"/>
+                                                                    </svg>
+                                                                </div>
+                                                            </div>
+                                                            <div x-show="item.video.featured" class="absolute top-4 left-4 bg-gradient-to-r from-pink-500 to-red-500 text-white px-4 py-2 rounded-full text-sm font-bold shadow-lg">
+                                                                ✨ FEATURED MOMENT
+                                                            </div>
+                                                            <div x-show="item.video.duration" class="absolute top-4 right-4 bg-black/70 text-white px-3 py-1 rounded-full text-sm font-medium">
+                                                                <span x-text="item.video.duration"></span>
+                                                            </div>
+                                                            <div class="absolute bottom-0 left-0 right-0 p-6">
+                                                                <h4 class="font-bold text-white text-xl md:text-2xl mb-2" x-text="item.video.title"></h4>
+                                                                <p class="text-white/90 text-sm md:text-base leading-relaxed" x-text="item.video.description"></p>
+                                                                <div class="flex items-center mt-3">
+                                                                    <span class="text-pink-300 text-sm font-medium">Click to watch the full video</span>
+                                                                    <svg class="w-4 h-4 text-pink-300 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                                                                    </svg>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="absolute inset-0 bg-gradient-to-r from-pink-500/20 to-red-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                                    </div>
+                                                    <div class="mt-4 bg-white/90 backdrop-blur-sm rounded-xl p-4 shadow-lg border border-pink-200">
+                                                        <div class="flex items-center justify-between">
+                                                            <div>
+                                                                <h5 class="font-bold text-custom-black text-lg">💍 The Proposal Story</h5>
+                                                                <p class="text-gray-600 text-sm mt-1">A magical moment captured forever</p>
+                                                            </div>
+                                                            <div class="text-right">
+                                                                <div class="text-pink-500 font-bold text-sm">WATCH NOW</div>
+                                                                <div class="text-gray-500 text-xs">Click the video above</div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <!-- Images Grid -->
+                                                <div class="grid grid-cols-2 gap-3 mb-6" x-show="item.images && item.images.length > 0">
+                                                    <template x-for="(image, imgIndex) in item.images.slice(0, 4)" :key="imgIndex">
+                                                        <div class="relative group cursor-pointer overflow-hidden rounded-lg shadow-md transform hover:scale-105 transition-all duration-300"
+                                                             @click="openEnhancedModal(image.src, image.title, image.description)">
+                                                            <img :src="image.src" :alt="image.alt" 
+                                                                 class="w-full h-24 md:h-32 object-cover">
+                                                            <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                                                                <div class="text-white text-center p-2">
+                                                                    <h4 class="font-bold text-sm" x-text="image.title"></h4>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </template>
+                                                </div>
+                                                <!-- View More Button (if more than 4 images) -->
+                                                <div x-show="item.images.length > 4" class="text-center md:text-left">
+                                                    <button @click="viewTimelineImages(item)" 
+                                                            class="inline-flex items-center px-4 py-2 bg-custom-red text-white rounded-full hover:bg-red-800 transition-colors duration-300">
+                                                        <span>View All Photos</span>
+                                                        <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                                        </svg>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </template>
+                                        <template x-if="index % 2 !== 0">
+                                            <div class="flex-1 order-3 md:order-2">
+                                                <!-- Enhanced Video Player (if available) -->
+                                                <div x-show="item.video" class="mb-8">
+                                                    <div class="relative group cursor-pointer overflow-hidden rounded-2xl shadow-2xl transform hover:scale-105 transition-all duration-500"
+                                                         :class="item.video.featured ? 'ring-4 ring-pink-300 ring-opacity-50' : ''"
+                                                         @click="openVideoModal(item.video)">
+                                                        <video :src="item.video.src" 
+                                                               class="w-full h-64 md:h-80 object-contain bg-black"
+                                                               preload="metadata">
+                                                        </video>
+                                                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent">
+                                                            <div class="absolute inset-0 flex items-center justify-center">
+                                                                <div class="bg-white/20 backdrop-blur-md rounded-full p-6 transform hover:scale-110 transition-all duration-300 border border-white/30">
+                                                                    <svg class="w-16 h-16 text-white drop-shadow-lg" fill="currentColor" viewBox="0 0 24 24">
+                                                                        <path d="M8 5v14l11-7z"/>
+                                                                    </svg>
+                                                                </div>
+                                                            </div>
+                                                            <div x-show="item.video.featured" class="absolute top-4 left-4 bg-gradient-to-r from-pink-500 to-red-500 text-white px-4 py-2 rounded-full text-sm font-bold shadow-lg">
+                                                                ✨ FEATURED MOMENT
+                                                            </div>
+                                                            <div x-show="item.video.duration" class="absolute top-4 right-4 bg-black/70 text-white px-3 py-1 rounded-full text-sm font-medium">
+                                                                <span x-text="item.video.duration"></span>
+                                                            </div>
+                                                            <div class="absolute bottom-0 left-0 right-0 p-6">
+                                                                <h4 class="font-bold text-white text-xl md:text-2xl mb-2" x-text="item.video.title"></h4>
+                                                                <p class="text-white/90 text-sm md:text-base leading-relaxed" x-text="item.video.description"></p>
+                                                                <div class="flex items-center mt-3">
+                                                                    <span class="text-pink-300 text-sm font-medium">Click to watch the full video</span>
+                                                                    <svg class="w-4 h-4 text-pink-300 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                                                                    </svg>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="absolute inset-0 bg-gradient-to-r from-pink-500/20 to-red-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                                    </div>
+                                                    <div class="mt-4 bg-white/90 backdrop-blur-sm rounded-xl p-4 shadow-lg border border-pink-200">
+                                                        <div class="flex items-center justify-between">
+                                                            <div>
+                                                                <h5 class="font-bold text-custom-black text-lg">💍 The Proposal Story</h5>
+                                                                <p class="text-gray-600 text-sm mt-1">A magical moment captured forever</p>
+                                                            </div>
+                                                            <div class="text-right">
+                                                                <div class="text-pink-500 font-bold text-sm">WATCH NOW</div>
+                                                                <div class="text-gray-500 text-xs">Click the video above</div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <!-- Images Grid -->
+                                                <div class="grid grid-cols-2 gap-3 mb-6" x-show="item.images && item.images.length > 0">
+                                                    <template x-for="(image, imgIndex) in item.images.slice(0, 4)" :key="imgIndex">
+                                                        <div class="relative group cursor-pointer overflow-hidden rounded-lg shadow-md transform hover:scale-105 transition-all duration-300"
+                                                             @click="openEnhancedModal(image.src, image.title, image.description)">
+                                                            <img :src="image.src" :alt="image.alt" 
+                                                                 class="w-full h-24 md:h-32 object-cover">
+                                                            <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                                                                <div class="text-white text-center p-2">
+                                                                    <h4 class="font-bold text-sm" x-text="image.title"></h4>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </template>
+                                                </div>
+                                                <!-- View More Button (if more than 4 images) -->
+                                                <div x-show="item.images.length > 4" class="text-center md:text-left">
+                                                    <button @click="viewTimelineImages(item)" 
+                                                            class="inline-flex items-center px-4 py-2 bg-custom-red text-white rounded-full hover:bg-red-800 transition-colors duration-300">
+                                                        <span>View All Photos</span>
+                                                        <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                                        </svg>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                    <!-- Wedding Celebration Marker -->
+                    <div class="mt-24 text-center">
+                        <div class="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-r from-custom-red to-custom-black rounded-full shadow-2xl border-4 border-white">
+                            <span class="text-4xl drop-shadow-lg">💒</span>
+                        </div>
+                        <div class="mt-4">
+                            <h3 class="text-3xl font-serif text-custom-black font-bold">The Wedding</h3>
+                            <p class="text-2xl text-custom-red font-semibold">August 8, 2025</p>
+                            <p class="text-gray-700 text-lg">The next chapter begins...</p>
                         </div>
                     </div>
                 </div>
@@ -1365,7 +1704,7 @@
     <div x-show="isEnhancedModalOpen" x-cloak @keydown.escape.window="closeEnhancedModal()" class="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
         <div @click.away="closeEnhancedModal()" class="relative max-w-4xl w-full">
             <div class="bg-white rounded-lg overflow-hidden shadow-2xl">
-                <img :src="enhancedModalData.imageUrl" :alt="enhancedModalData.title" class="w-full max-h-[70vh] object-cover">
+                <img :src="enhancedModalData.imageUrl" :alt="enhancedModalData.title" class="w-full max-h-[70vh] object-contain bg-gray-100 p-4 rounded-lg">
                 <div class="p-6">
                     <h3 class="text-2xl font-serif text-custom-black mb-2" x-text="enhancedModalData.title"></h3>
                     <p class="text-gray-600 mb-4" x-text="enhancedModalData.description"></p>
@@ -1376,6 +1715,87 @@
                 </div>
             </div>
             <button @click="closeEnhancedModal()" class="absolute -top-4 -right-4 bg-white text-black rounded-full h-12 w-12 flex items-center justify-center text-2xl shadow-lg">&times;</button>
+        </div>
+    </div>
+
+    <!-- Enhanced Video Modal -->
+    <div x-show="isVideoModalOpen" x-cloak @keydown.escape.window="closeVideoModal()" class="fixed inset-0 bg-black/98 z-50 flex items-center justify-center p-4">
+        <div @click.away="closeVideoModal()" class="relative w-full max-w-4xl">
+            <div class="bg-white rounded-2xl overflow-hidden shadow-2xl">
+                <!-- Video Header -->
+                <div class="bg-gradient-to-r from-pink-500 to-red-500 text-white p-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <span class="text-2xl mr-3">💍</span>
+                            <div>
+                                <h3 class="text-xl font-bold" x-text="videoModalData.title"></h3>
+                                <p class="text-pink-100 text-sm" x-text="videoModalData.duration"></p>
+                            </div>
+                        </div>
+                        <button @click="closeVideoModal()" class="bg-white/20 hover:bg-white/30 rounded-full p-2 transition-colors">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Video Container -->
+                <div class="relative bg-black">
+                    <video id="modalVideo" 
+                           :src="videoModalData.src" 
+                           controls 
+                           class="w-full h-auto max-h-[60vh] object-contain"
+                           preload="metadata"
+                           poster="">
+                        Your browser does not support the video tag.
+                    </video>
+                    
+                    <!-- Video Overlay -->
+                    <div class="absolute top-4 left-4 bg-black/70 text-white px-3 py-1 rounded-full text-sm font-medium">
+                        ✨ FEATURED MOMENT
+                    </div>
+                </div>
+                
+                <!-- Video Info -->
+                <div class="p-6 bg-gradient-to-br from-gray-50 to-white">
+                    <p class="text-gray-700 text-lg leading-relaxed mb-4" x-text="videoModalData.description"></p>
+                    
+                    <!-- Video Stats -->
+                    <div class="grid grid-cols-2 gap-4 mb-6">
+                        <div class="bg-white rounded-lg p-3 border border-gray-200">
+                            <div class="text-sm text-gray-500">Duration</div>
+                            <div class="font-bold text-custom-black" x-text="videoModalData.duration"></div>
+                        </div>
+                        <div class="bg-white rounded-lg p-3 border border-gray-200">
+                            <div class="text-sm text-gray-500">Quality</div>
+                            <div class="font-bold text-custom-black">HD</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center space-x-4">
+                            <button @click="shareVideo()" class="flex items-center space-x-2 bg-blue-500 text-white px-4 py-2 rounded-full hover:bg-blue-600 transition-colors">
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M15 8a3 3 0 10-2.977-2.63l-4.94 2.47a3 3 0 100 4.319l4.94 2.47a3 3 0 10.895-1.789l-4.94-2.47a3.027 3.027 0 000-.74l4.94-2.47C13.456 7.68 14.19 8 15 8z"/>
+                                </svg>
+                                <span>Share</span>
+                            </button>
+                            <button @click="downloadVideo()" class="flex items-center space-x-2 bg-green-500 text-white px-4 py-2 rounded-full hover:bg-green-600 transition-colors">
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                                </svg>
+                                <span>Download</span>
+                            </button>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-sm text-gray-500">#ElderHeartsRice</p>
+                            <p class="text-xs text-gray-400">Marcus & Lakeigha</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
