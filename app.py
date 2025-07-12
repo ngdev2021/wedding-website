@@ -241,6 +241,55 @@ def get_guestbook():
         print(f"Error retrieving guest book data: {e}")
         return jsonify({'error': 'Failed to retrieve guest book data'}), 500
 
+@app.route('/api/guestbook/<message_id>', methods=['PUT'])
+def update_guestbook(message_id):
+    """Update an existing guestbook message"""
+    try:
+        data = request.get_json()
+        guestbook_data = load_data(GUESTBOOK_FILE)
+        
+        # Find and update the guestbook message
+        for message in guestbook_data:
+            if message['id'] == message_id:
+                message.update({
+                    'name': data.get('name', message['name']),
+                    'relationship': data.get('relationship', message['relationship']),
+                    'message': data.get('message', message['message']),
+                    'timestamp': datetime.now().isoformat()
+                })
+                save_data(GUESTBOOK_FILE, guestbook_data)
+                return jsonify({
+                    'success': True,
+                    'message': 'Guestbook message updated successfully'
+                })
+        
+        return jsonify({'error': 'Guestbook message not found'}), 404
+    except Exception as e:
+        print(f"Error updating guestbook message: {e}")
+        return jsonify({'error': 'Failed to update guestbook message'}), 500
+
+@app.route('/api/guestbook/<message_id>', methods=['DELETE'])
+def delete_guestbook(message_id):
+    """Delete a guestbook message"""
+    try:
+        guestbook_data = load_data(GUESTBOOK_FILE)
+        
+        # Find and remove the guestbook message
+        for i, message in enumerate(guestbook_data):
+            if message['id'] == message_id:
+                deleted_name = message['name']
+                guestbook_data.pop(i)
+                save_data(GUESTBOOK_FILE, guestbook_data)
+                return jsonify({
+                    'success': True,
+                    'message': f'Guestbook message from {deleted_name} deleted successfully'
+                })
+        
+        return jsonify({'error': 'Guestbook message not found'}), 404
+    except Exception as e:
+        print(f"Error deleting guestbook message: {e}")
+        return jsonify({'error': 'Failed to delete guestbook message'}), 500
+
 @app.route('/api/rsvp/stats', methods=['GET'])
 def get_rsvp_stats():
     """Get RSVP statistics with enhanced metrics"""
@@ -338,6 +387,55 @@ def get_rsvp_data():
         print(f"Error retrieving RSVP data: {e}")
         return jsonify({'error': 'Failed to retrieve RSVP data'}), 500
 
+@app.route('/api/rsvp/<rsvp_id>', methods=['PUT'])
+def update_rsvp(rsvp_id):
+    """Update an existing RSVP"""
+    try:
+        data = request.get_json()
+        rsvp_data = load_data(RSVP_FILE)
+        
+        # Find and update the RSVP
+        for rsvp in rsvp_data:
+            if rsvp['id'] == rsvp_id:
+                rsvp.update({
+                    'name': data.get('name', rsvp['name']),
+                    'attendance': data.get('attendance', rsvp['attendance']),
+                    'song': data.get('song', rsvp.get('song', '')),
+                    'timestamp': datetime.now().isoformat()
+                })
+                save_data(RSVP_FILE, rsvp_data)
+                return jsonify({
+                    'success': True,
+                    'message': 'RSVP updated successfully'
+                })
+        
+        return jsonify({'error': 'RSVP not found'}), 404
+    except Exception as e:
+        print(f"Error updating RSVP: {e}")
+        return jsonify({'error': 'Failed to update RSVP'}), 500
+
+@app.route('/api/rsvp/<rsvp_id>', methods=['DELETE'])
+def delete_rsvp(rsvp_id):
+    """Delete an RSVP"""
+    try:
+        rsvp_data = load_data(RSVP_FILE)
+        
+        # Find and remove the RSVP
+        for i, rsvp in enumerate(rsvp_data):
+            if rsvp['id'] == rsvp_id:
+                deleted_name = rsvp['name']
+                rsvp_data.pop(i)
+                save_data(RSVP_FILE, rsvp_data)
+                return jsonify({
+                    'success': True,
+                    'message': f'RSVP for {deleted_name} deleted successfully'
+                })
+        
+        return jsonify({'error': 'RSVP not found'}), 404
+    except Exception as e:
+        print(f"Error deleting RSVP: {e}")
+        return jsonify({'error': 'Failed to delete RSVP'}), 500
+
 @app.route('/api/waitlist', methods=['POST'])
 def submit_waitlist():
     """Handle waitlist form submissions"""
@@ -398,6 +496,54 @@ def get_waitlist_data():
     except Exception as e:
         print(f"Error retrieving waitlist data: {e}")
         return jsonify({'error': 'Failed to retrieve waitlist data'}), 500
+
+@app.route('/api/waitlist/<waitlist_id>', methods=['PUT'])
+def update_waitlist(waitlist_id):
+    """Update an existing waitlist entry"""
+    try:
+        data = request.get_json()
+        waitlist_data = load_data(WAITLIST_FILE)
+        
+        # Find and update the waitlist entry
+        for entry in waitlist_data:
+            if entry['id'] == waitlist_id:
+                entry.update({
+                    'name': data.get('name', entry['name']),
+                    'song': data.get('song', entry.get('song', '')),
+                    'timestamp': datetime.now().isoformat()
+                })
+                save_data(WAITLIST_FILE, waitlist_data)
+                return jsonify({
+                    'success': True,
+                    'message': 'Waitlist entry updated successfully'
+                })
+        
+        return jsonify({'error': 'Waitlist entry not found'}), 404
+    except Exception as e:
+        print(f"Error updating waitlist entry: {e}")
+        return jsonify({'error': 'Failed to update waitlist entry'}), 500
+
+@app.route('/api/waitlist/<waitlist_id>', methods=['DELETE'])
+def delete_waitlist(waitlist_id):
+    """Delete a waitlist entry"""
+    try:
+        waitlist_data = load_data(WAITLIST_FILE)
+        
+        # Find and remove the waitlist entry
+        for i, entry in enumerate(waitlist_data):
+            if entry['id'] == waitlist_id:
+                deleted_name = entry['name']
+                waitlist_data.pop(i)
+                save_data(WAITLIST_FILE, waitlist_data)
+                return jsonify({
+                    'success': True,
+                    'message': f'Waitlist entry for {deleted_name} deleted successfully'
+                })
+        
+        return jsonify({'error': 'Waitlist entry not found'}), 404
+    except Exception as e:
+        print(f"Error deleting waitlist entry: {e}")
+        return jsonify({'error': 'Failed to delete waitlist entry'}), 500
 
 @app.route('/api/site-config', methods=['GET'])
 def get_site_config():

@@ -1,10 +1,10 @@
 [
   {
     "id": "20250712_132601_078549",
-    "name": "John Doe",
+    "name": "John Doe Updated",
     "attendance": "attending",
-    "song": "Happy",
-    "timestamp": "2025-07-12T13:26:01.078579",
+    "song": "Updated Song",
+    "timestamp": "2025-07-12T13:38:46.629908",
     "ip_address": "imported",
     "imported": true
   },
