@@ -152,6 +152,7 @@
                 guestBook: { name: '', relationship: '', message: '' },
                 guestBookMessages: [],
                 timelineData: window.timelineData || [],
+                siteConfig: { showHotelInfo: true, hotelName: '', hotelAddress: '', bookingLink: '' },
 
                 init() {
                     // Ensure DOM is ready
@@ -161,6 +162,7 @@
                         this.initParallax();
                         this.checkRsvpDeadline();
                         this.loadGuestBookMessages();
+                        this.loadSiteConfig();
                         this.isInitialized = true;
                     });
                 },
@@ -439,6 +441,25 @@
                         console.error('Error loading guest book messages:', error);
                         // Fallback to empty array if backend is not available
                         this.guestBookMessages = [];
+                    }
+                },
+
+                async loadSiteConfig() {
+                    try {
+                        const response = await fetch('/api/site-config');
+                        const result = await response.json();
+                        if (result.success) {
+                            this.siteConfig = result.config || this.siteConfig;
+                        }
+                    } catch (error) {
+                        console.error('Error loading site config:', error);
+                        // Fallback to default values
+                        this.siteConfig = {
+                            showHotelInfo: true,
+                            hotelName: 'Hampton Inn & Suites Ft. Worth-Burleson',
+                            hotelAddress: '13251 Jake Ct, Burleson, TX 76028',
+                            bookingLink: 'https://www.google.com/travel/search?ts=CAESCAoCCAMKAggDGhwSGhIUCgcI6Q8QARgeEgcI6Q8QARgfGAEyAhAAKgcKBToDVVNE&qs=CAEyFENnc0l0ZGlRamViNWhLTHRBUkFCOApCCREL08P7HO_8ikIJEQKS7AAeOhwDQgkRy6OAidTYq_NaUQgBMk2qAUoQASoKIgZob3RlbHMoADIfEAEiG4_fMcyX83ZMB4u11pHZG8IJuZmkvlGPnVOVDTIZEAIiFWhvdGVscyBpbiBidXJsZXNvbiB0eA&utm_campaign=sharing&utm_medium=link_btn&utm_source=htls'
+                        };
                     }
                 },
 
@@ -1492,7 +1513,11 @@
                     <div>
                         <h3 class="text-2xl font-serif text-custom-black">Getting Here & Staying Over</h3>
                         <p class="mt-4 text-lg">For our out-of-town guests, we've arranged a block of rooms at a special rate. Please book by July 8, 2025, to secure your discount.</p>
-                        <!-- Hotel information removed for privacy -->
+                        <div x-show="siteConfig.showHotelInfo" class="mt-6 p-6 border border-gray-200 rounded-lg shadow-sm bg-white">
+                            <p class="font-bold text-xl" x-text="siteConfig.hotelName">Hampton Inn & Suites Ft. Worth-Burleson</p>
+                            <p class="mt-2" x-text="siteConfig.hotelAddress">13251 Jake Ct, Burleson, TX 76028</p>
+                            <a :href="siteConfig.bookingLink" target="_blank" class="inline-block mt-4 bg-custom-red text-white font-bold py-3 px-8 rounded-full hover:bg-opacity-90 hover:scale-105 transform transition-all shadow-lg drop-shadow-lg">Book Your Room</a>
+                        </div>
                          <p class="mt-6 text-sm"><strong>For Our Families:</strong> For close family members interested in alternative arrangements, please reach out to Judy, Frankie, or Shawnta directly regarding available space at their homes.</p>
                     </div>
                     <!-- Map removed for privacy -->

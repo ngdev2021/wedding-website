@@ -69,6 +69,11 @@
                             class="py-4 px-1 border-b-2 font-medium text-sm">
                         Guest Book Messages
                     </button>
+                    <button @click="activeTab = 'config'" 
+                            :class="activeTab === 'config' ? 'border-custom-red text-custom-red' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                            class="py-4 px-1 border-b-2 font-medium text-sm">
+                        Site Configuration
+                    </button>
                 </nav>
             </div>
 
@@ -176,6 +181,43 @@
                     </template>
                 </div>
             </div>
+
+            <!-- Site Configuration Tab -->
+            <div x-show="activeTab === 'config'" class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-serif text-custom-black">Site Configuration</h2>
+                    <button @click="loadSiteConfig()" class="bg-custom-red text-white px-4 py-2 rounded-lg hover:bg-opacity-90">
+                        Refresh
+                    </button>
+                </div>
+                
+                <div class="grid gap-4">
+                    <div class="bg-white rounded-lg p-6 shadow-md">
+                        <h3 class="text-lg font-semibold text-gray-700 mb-2">Hotel Information</h3>
+                        <div class="flex items-center mb-2">
+                            <input type="checkbox" id="showHotelInfo" x-model="siteConfig.showHotelInfo" class="mr-2">
+                            <label for="showHotelInfo" class="text-sm text-gray-700">Show Hotel Information on Main Site</label>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label for="hotelName" class="block text-sm font-medium text-gray-700">Hotel Name</label>
+                                <input type="text" id="hotelName" x-model="siteConfig.hotelName" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-custom-red focus:ring-custom-red sm:text-sm">
+                            </div>
+                            <div>
+                                <label for="hotelAddress" class="block text-sm font-medium text-gray-700">Hotel Address</label>
+                                <input type="text" id="hotelAddress" x-model="siteConfig.hotelAddress" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-custom-red focus:ring-custom-red sm:text-sm">
+                            </div>
+                            <div>
+                                <label for="bookingLink" class="block text-sm font-medium text-gray-700">Booking Link</label>
+                                <input type="url" id="bookingLink" x-model="siteConfig.bookingLink" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-custom-red focus:ring-custom-red sm:text-sm">
+                            </div>
+                        </div>
+                        <button @click="saveSiteConfig()" class="mt-4 bg-custom-red text-white px-4 py-2 rounded-lg hover:bg-opacity-90">
+                            Save Hotel Information
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Export Section -->
@@ -203,6 +245,12 @@
                 rsvpData: [],
                 waitlistData: [],
                 guestBookData: [],
+                siteConfig: {
+                    showHotelInfo: false,
+                    hotelName: '',
+                    hotelAddress: '',
+                    bookingLink: ''
+                },
                 stats: {},
 
                 init() {
@@ -210,6 +258,7 @@
                     this.loadRsvpData();
                     this.loadWaitlistData();
                     this.loadGuestBookData();
+                    this.loadSiteConfig();
                 },
 
                 async loadStats() {
@@ -257,6 +306,38 @@
                         }
                     } catch (error) {
                         console.error('Error loading waitlist data:', error);
+                    }
+                },
+
+                async loadSiteConfig() {
+                    try {
+                        const response = await fetch('/api/site-config');
+                        const result = await response.json();
+                        if (result.success) {
+                            this.siteConfig = result.config || {};
+                        }
+                    } catch (error) {
+                        console.error('Error loading site config:', error);
+                    }
+                },
+
+                async saveSiteConfig() {
+                    try {
+                        const response = await fetch('/api/site-config', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(this.siteConfig)
+                        });
+                        const result = await response.json();
+                        if (result.success) {
+                            alert('Hotel information saved successfully!');
+                        } else {
+                            alert('Failed to save hotel information.');
+                        }
+                    } catch (error) {
+                        console.error('Error saving site config:', error);
                     }
                 },
 

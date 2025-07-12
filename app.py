@@ -19,6 +19,7 @@ DATA_DIR = 'data'
 RSVP_FILE = os.path.join(DATA_DIR, 'rsvp_data.json')
 WAITLIST_FILE = os.path.join(DATA_DIR, 'waitlist_data.json')
 GUESTBOOK_FILE = os.path.join(DATA_DIR, 'guestbook_data.json')
+SITE_CONFIG_FILE = os.path.join(DATA_DIR, 'site_config.json')
 
 # Ensure data files exist
 def ensure_data_files():
@@ -37,6 +38,15 @@ def ensure_data_files():
     if not os.path.exists(WAITLIST_FILE):
         with open(WAITLIST_FILE, 'w') as f:
             json.dump([], f)
+    
+    if not os.path.exists(SITE_CONFIG_FILE):
+        with open(SITE_CONFIG_FILE, 'w') as f:
+            json.dump({
+                'showHotelInfo': True,
+                'hotelName': 'Hampton Inn & Suites Ft. Worth-Burleson',
+                'hotelAddress': '13251 Jake Ct, Burleson, TX 76028',
+                'bookingLink': 'https://www.google.com/travel/search?ts=CAESCAoCCAMKAggDGhwSGhIUCgcI6Q8QARgeEgcI6Q8QARgfGAEyAhAAKgcKBToDVVNE&qs=CAEyFENnc0l0ZGlRamViNWhLTHRBUkFCOApCCREL08P7HO_8ikIJEQKS7AAeOhwDQgkRy6OAidTYq_NaUQgBMk2qAUoQASoKIgZob3RlbHMoADIfEAEiG4_fMcyX83ZMB4u11pHZG8IJuZmkvlGPnVOVDTIZEAIiFWhvdGVscyBpbiBidXJsZXNvbiB0eA&utm_campaign=sharing&utm_medium=link_btn&utm_source=htls'
+            }, f)
 
 # Initialize data files when app starts
 ensure_data_files()
@@ -327,6 +337,47 @@ def get_waitlist_data():
         print(f"Error retrieving waitlist data: {e}")
         return jsonify({'error': 'Failed to retrieve waitlist data'}), 500
 
+@app.route('/api/site-config', methods=['GET'])
+def get_site_config():
+    """Retrieve site configuration"""
+    try:
+        config = load_data(SITE_CONFIG_FILE)
+        return jsonify({
+            'success': True,
+            'config': config
+        })
+    except Exception as e:
+        print(f"Error retrieving site config: {e}")
+        return jsonify({'error': 'Failed to retrieve site configuration'}), 500
+
+@app.route('/api/site-config', methods=['POST'])
+def update_site_config():
+    """Update site configuration"""
+    try:
+        data = request.get_json()
+        config = load_data(SITE_CONFIG_FILE)
+        
+        # Update specific fields if provided, otherwise keep existing
+        if 'showHotelInfo' in data:
+            config['showHotelInfo'] = data['showHotelInfo']
+        if 'hotelName' in data:
+            config['hotelName'] = data['hotelName']
+        if 'hotelAddress' in data:
+            config['hotelAddress'] = data['hotelAddress']
+        if 'bookingLink' in data:
+            config['bookingLink'] = data['bookingLink']
+        
+        save_data(SITE_CONFIG_FILE, config)
+        
+        return jsonify({
+            'success': True,
+            'message': 'Site configuration updated successfully',
+            'config': config
+        })
+    except Exception as e:
+        print(f"Error updating site config: {e}")
+        return jsonify({'error': 'Failed to update site configuration'}), 500
+
 @app.route('/api/health', methods=['GET'])
 def health_check():
     """Health check endpoint"""
@@ -336,7 +387,8 @@ def health_check():
         'data_files': {
             'rsvp': os.path.exists(RSVP_FILE),
             'waitlist': os.path.exists(WAITLIST_FILE),
-            'guestbook': os.path.exists(GUESTBOOK_FILE)
+            'guestbook': os.path.exists(GUESTBOOK_FILE),
+            'site_config': os.path.exists(SITE_CONFIG_FILE)
         }
     })
 
